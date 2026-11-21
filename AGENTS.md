@@ -21,7 +21,8 @@ change.
 - Re-verify behavior against a live herdr session before release, and record
   the herdr and CLI versions in `references/harnesses.md`.
 - Update `AGENT-INSTALL.md` and `README.md` whenever discovery, invocation, or
-  installation changes.
+  installation changes, and keep `tests/contract-test.sh` in step with the
+  contract. Run it after committing; it clones `HEAD`.
 - Dogfooding collision: with herdr-subagent installed globally, every harness
   also sees this repository's skill. Claude Code and Cline prefer the global
   copy (your edits seem to have no effect), Codex lists both, and Gemini CLI

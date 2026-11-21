@@ -25,7 +25,9 @@ jobs:
         run: .agents/skills/herdr-subagent/scripts/herdr-subagent.sh --help
       - name: ShellCheck
         if: runner.os == 'Linux'
-        run: shellcheck .agents/skills/herdr-subagent/scripts/herdr-subagent.sh
+        run: shellcheck .agents/skills/herdr-subagent/scripts/herdr-subagent.sh tests/contract-test.sh
+      - name: Install contract walk-through (scratch HOME)
+        run: tests/contract-test.sh
       - name: Check Claude skill mirror is byte-identical
         run: diff -r .agents/skills .claude/skills
       - name: Check every SKILL.md is under agy's 24,000-byte limit

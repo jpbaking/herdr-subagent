@@ -22,7 +22,7 @@ configuration, so install it only when the user asks.
 | Kind | Tested version | Verified | Model flag | Permission and mode flags |
 | --- | --- | --- | --- | --- |
 | `opencode` | v2.3.2 | full lifecycle in split and tab: spawn, prompt, wait, multi-turn steer, escalate, close | none in the interactive TUI; uses the configured default | `--auto` |
-| `claude` | 2.1.330 | spawn, state detection, close | `--model <alias or id>` | `--permission-mode <mode>`, `--dangerously-skip-permissions` |
+| `claude` | 2.1.330 | spawn, prompt, wait, report, close | `--model <alias or id>` | `--permission-mode <mode>`, `--dangerously-skip-permissions` |
 | `codex` | 0.171.0 | spawn, prompt, wait, report, close | `-m <model>`, `-p <profile>` | `-s <sandbox>`, `--dangerously-bypass-approvals-and-sandbox` |
 | `agy` | 1.5.13 | spawn, prompt, wait, report, close | `--model <model>` | `--mode accept-edits\|auto\|plan`, `--dangerously-skip-permissions` |
 
@@ -33,9 +33,9 @@ Enter key answers it. In testing, codex accepted its own update offer this
 way, upgraded itself, and exited, so `wait` returned code 6 (gone). Read the
 pane once after `spawn` and prompt only when the CLI is at its input prompt.
 
-For a kind that has not yet been verified through a full round-trip, treat its first
-delegation as a trial: send a trivial read-only prompt, and confirm that
-`wait` returns on the report before you hand it real work.
+After upgrading herdr or a delegate CLI, treat the first delegation as a
+trial: send a trivial read-only prompt, and confirm that `wait` returns on
+the report before you hand it real work.
 
 ## opencode
 
