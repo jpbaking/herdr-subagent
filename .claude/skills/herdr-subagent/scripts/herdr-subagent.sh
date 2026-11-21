@@ -4,7 +4,7 @@
 # the report, and close it after acceptance.
 #
 # Usage:
-#   herdr-subagent.sh spawn  <name> <kind> [--layout split|tab] [--cwd DIR] [-- AGENT_ARGS...]
+#   herdr-subagent.sh spawn  <name> <kind> [--layout auto|split|tab] [--cwd DIR] [-- AGENT_ARGS...]
 #   herdr-subagent.sh prompt <name> <prompt-file>     # prints the report path
 #   herdr-subagent.sh wait   <name> <report-path> [timeout-seconds]
 #   herdr-subagent.sh read   <name> [lines]
@@ -12,6 +12,9 @@
 #   herdr-subagent.sh list
 #
 # Kinds: opencode, agy, codex, claude.
+# Layouts: auto (default) puts the first two open delegates in a column to the
+# right of the planner, stacked top to bottom, and each later one in its own
+# tab. split always joins that column (or starts it); tab always opens a tab.
 # wait exit codes: 0 success, 2 escalate, 3 failed, 4 blocked (prompt waiting
 # in the pane), 5 idle without a report, 6 agent gone, 7 timeout.
 set -euo pipefail
@@ -20,6 +23,7 @@ STATE_DIR="${HERDR_SUBAGENT_DIR:-${TMPDIR:-/tmp}/herdr-subagent}"
 STATE_DIR="${STATE_DIR%/}"
 STATE="$STATE_DIR/.state"
 KINDS="opencode agy codex claude"
+SPLIT_MAX=2 # open delegates the right-hand column holds before auto uses tabs
 
 die() { echo "herdr-subagent: $*" >&2; exit 1; }
 
@@ -41,9 +45,33 @@ agent_status() { # name -> status or "gone"
   jq -r '.result.agent.agent_status // "unknown"' <<<"$out"
 }
 
+planner_tab() {
+  if [ -n "${HERDR_TAB_ID:-}" ]; then echo "$HERDR_TAB_ID"; return; fi
+  herdr pane current | jq -r '.result.pane.tab_id'
+}
+
+column_panes() { # tab -> panes of open split delegates in that tab, top to bottom
+  local tab=$1 f name pane ids=""
+  for f in "$STATE"/*; do
+    [ -f "$f" ] || continue
+    name=$(basename "$f")
+    [ "$(state_get "$name" layout)" = split ] && [ "$(state_get "$name" tab)" = "$tab" ] || continue
+    pane=$(state_get "$name" pane)
+    herdr pane get "$pane" >/dev/null 2>&1 || continue # closed outside this script
+    ids="$ids $pane"
+  done
+  [ -n "$ids" ] || return 0
+  # shellcheck disable=SC2086 # word splitting of $ids is intended
+  set -- $ids
+  herdr pane layout --pane "$1" | jq -r --arg ids "$ids" \
+    '($ids | split(" ") | map(select(. != ""))) as $want
+     | .result.layout.panes | map(select(.pane_id as $p | $want | index($p)))
+     | sort_by(.rect.y) | .[].pane_id'
+}
+
 cmd_spawn() {
-  [ $# -ge 2 ] || die "usage: spawn <name> <kind> [--layout split|tab] [--cwd DIR] [-- AGENT_ARGS...]"
-  local name=$1 kind=$2 layout=split cwd=$PWD out pane tab code i
+  [ $# -ge 2 ] || die "usage: spawn <name> <kind> [--layout auto|split|tab] [--cwd DIR] [-- AGENT_ARGS...]"
+  local name=$1 kind=$2 layout=auto cwd=$PWD out pane tab code i bottom="" n=0 p
   shift 2
   local -a args=()
   while [ $# -gt 0 ]; do
@@ -60,16 +88,30 @@ cmd_spawn() {
   [ ! -f "$STATE/$name" ] || die "'$name' already exists; close it or pick another name"
   if herdr agent get "$name" >/dev/null 2>&1; then die "a herdr agent named '$name' already exists"; fi
 
+  case $layout in auto|split|tab) ;; *) die "layout must be auto, split or tab" ;; esac
+  if [ "$layout" != tab ]; then
+    while IFS= read -r p; do
+      [ -n "$p" ] || continue
+      bottom=$p; n=$((n + 1))
+    done < <(column_panes "$(planner_tab)")
+    if [ "$layout" = auto ]; then
+      if [ "$n" -lt "$SPLIT_MAX" ]; then layout="split"; else layout="tab"; fi
+    fi
+  fi
+
   case $layout in
     split)
-      out=$(herdr pane split --current --direction right --no-focus --cwd "$cwd")
+      if [ -z "$bottom" ]; then # start the column to the right of the planner
+        out=$(herdr pane split --current --direction right --no-focus --cwd "$cwd")
+      else # stack below the column's bottom pane, halving it
+        out=$(herdr pane split "$bottom" --direction down --ratio 0.5 --no-focus --cwd "$cwd")
+      fi
       pane=$(jq -r '.result.pane.pane_id' <<<"$out")
       tab=$(jq -r '.result.pane.tab_id' <<<"$out") ;;
     tab)
       out=$(herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd "$cwd" --label "$name" --no-focus)
       pane=$(jq -r '.result.root_pane.pane_id' <<<"$out")
       tab=$(jq -r '.result.tab.tab_id' <<<"$out") ;;
-    *) die "layout must be split or tab" ;;
   esac
   [ -n "$pane" ] && [ "$pane" != null ] || die "could not create a pane: $out"
   printf 'pane=%s\ntab=%s\nlayout=%s\nkind=%s\n' "$pane" "$tab" "$layout" "$kind" >"$STATE/$name"
@@ -172,7 +214,7 @@ cmd_list() {
   done
 }
 
-usage() { sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; }
 
 sub=${1:-}
 [ $# -gt 0 ] && shift

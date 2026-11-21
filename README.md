@@ -37,8 +37,9 @@ close                        ──▶     pane or tab closes
 - **Wait outcomes.** `wait` exits with 0 success, 2 escalate, 3 failed,
   4 blocked (a permission prompt is waiting in the pane), 5 idle without a
   report, 6 session gone, or 7 timeout.
-- **Layouts.** A split pane next to the planner by default; a background tab
-  when several delegate sessions must be open at once.
+- **Layouts.** By default the first two open delegates share a column to the
+  right of the planner, stacked top to bottom, and the third and later ones
+  each get a background tab. `--layout split` or `--layout tab` overrides it.
 - **Concurrency.** The skill follows your stated limit, or one running
   delegate per model backend. Use that for a local model server that serves
   one session at a time.
@@ -115,7 +116,7 @@ You can also run the bundled script yourself:
 
 ```sh
 S=~/.claude/skills/herdr-subagent/scripts/herdr-subagent.sh   # or your harness's path
-$S spawn sub-survey opencode --layout split   # or --layout tab; -- <cli flags>
+$S spawn sub-survey opencode                  # auto layout; --layout split|tab; -- <cli flags>
 $S prompt sub-survey task.txt                 # prints the report path
 $S wait sub-survey /tmp/herdr-subagent/sub-survey-….md
 $S read sub-survey 40                         # pane tail, for blocked/idle cases

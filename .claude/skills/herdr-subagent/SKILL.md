@@ -25,9 +25,12 @@ Determine these from the request. Ask only for what you cannot determine.
    `agy`, `codex`, `claude`. The script refuses other kinds.
 3. **Model**: the CLI's configured default. Pass a model flag only when the
    user names a model.
-4. **Layout**: `split` (a pane to the right of yours) by default. Use `tab`
-   when more than one delegate session will be open at the same time, or when
-   the user asks for tabs.
+4. **Layout**: `auto` by default. The first two open delegates share a
+   column to the right of your pane, stacked top to bottom; the third and
+   later ones each get a background tab. A slot frees up when its delegate
+   closes. Pass `split` or `tab` only when the user asks for one: `split`
+   always joins (or starts) the right-hand column, and `tab` always opens a
+   tab.
 5. **Concurrency limit**: follow the user's stated limit. If none is known,
    allow one running delegate per model backend. Delegates on the same
    backend, such as two CLIs pointed at one local model server, count
@@ -47,9 +50,10 @@ Stop and tell the user if any check fails.
 ## Lifecycle
 
 1. **Name it** `sub-<short-task>`, using only letters, digits, `.`, `_` and `-`.
-2. **Spawn**: run `herdr-subagent.sh spawn <name> <kind> --layout split|tab`.
-   Add `-- <cli flags>` only for flags the user asked for. It prints the pane
-   and tab, and it fails if the CLI is not on PATH or herdr cannot start it.
+2. **Spawn**: run `herdr-subagent.sh spawn <name> <kind>`, adding
+   `--layout split|tab` only to override the default. Add `-- <cli flags>`
+   only for flags the user asked for. It prints the layout it chose, the pane
+   and the tab, and it fails if the CLI is not on PATH or herdr cannot start it.
    Then run `herdr-subagent.sh read <name> 20` once. Confirm the CLI is at its
    input prompt. If it shows an update offer, a folder-trust question, or a
    sign-in screen, do not prompt yet: your prompt's Enter key would answer

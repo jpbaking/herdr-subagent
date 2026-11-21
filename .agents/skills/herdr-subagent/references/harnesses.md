@@ -37,6 +37,16 @@ After upgrading herdr or a delegate CLI, treat the first delegation as a
 trial: send a trivial read-only prompt, and confirm that `wait` returns on
 the report before you hand it real work.
 
+## Layouts
+
+The default `auto` layout counts the open `split` delegates in the planner's
+tab. With none, it splits the planner's pane to the right; with one, it splits
+that delegate's pane downward at a 0.5 ratio, so the column holds two equal
+panes; with two or more, it opens a tab. A delegate whose pane was closed
+outside the script no longer counts. Verified on 2026-11-21 with herdr 0.7.5:
+the first-to-third spawns, reuse of a slot freed by `close`, a forced third
+`--layout split` (it halves the bottom pane), and a pane closed by hand.
+
 ## opencode
 
 - A smaller local model (Ornith 1.5 35B through opencode) completed the README
