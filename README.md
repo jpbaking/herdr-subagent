@@ -76,7 +76,7 @@ into Antigravity CLI, Codex, Claude Code, Gemini CLI, Cline, or OpenCode:
 ```text
 Install herdr-subagent. Using git with my existing credentials (do not
 download raw files or archives), clone https://github.com/jpbaking/herdr-subagent
-at tag v0.1.2 with --depth 1 and git's terminal prompt disabled
+at tag v0.1.3 with --depth 1 and git's terminal prompt disabled
 (GIT_TERMINAL_PROMPT=0) into a new temporary directory outside any project;
 a "not a commit" warning about the tag is normal. If the clone fails for lack
 of credentials, stop and tell me how to sign in. Then read AGENT-INSTALL.md
@@ -85,8 +85,8 @@ existing files, ask me which harnesses to install for, and report every file
 you created or changed.
 ```
 
-This prompt pins release `v0.1.2`. To install another release, change the
-tag; to track the default branch, drop `at tag v0.1.2`. On a fork, mirror, or
+This prompt pins release `v0.1.3`. To install another release, change the
+tag; to track the default branch, drop `at tag v0.1.3`. On a fork, mirror, or
 enterprise host, substitute the remote you clone from.
 
 **What the prompt does:** your agent clones this repository with your own git
