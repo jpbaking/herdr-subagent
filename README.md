@@ -14,6 +14,8 @@ context, and it **closes** the pane or tab once it accepts the result.
 The skill installs into Antigravity CLI, Codex, Claude Code, Gemini CLI,
 Cline, and OpenCode, any of which can act as the planner.
 
+https://github.com/user-attachments/assets/9b6b6661-b1ad-4d85-8be9-f75b2600ee60
+
 ## How it works
 
 ```text
