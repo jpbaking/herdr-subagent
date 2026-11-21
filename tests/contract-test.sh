@@ -3,7 +3,7 @@
 # idempotent re-run, stale copy plus user content, and uninstall.
 #
 #   tests/contract-test.sh                      # test this checkout
-#   REMOTE=https://github.com/jpbaking/herdr-subagent TAG=v0.1.1 tests/contract-test.sh
+#   REMOTE=https://github.com/jpbaking/herdr-subagent TAG=v0.1.2 tests/contract-test.sh
 # shellcheck disable=SC2015  # "test && ok || bad" is safe: ok always succeeds.
 set -uo pipefail
 REMOTE=${REMOTE:-file://$(cd "$(dirname "$0")/.." && pwd)}

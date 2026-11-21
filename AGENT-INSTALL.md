@@ -39,8 +39,11 @@ contributor layout, not install destinations.
 1. If you are reading this file from a fresh clone of the source remote in a
    temporary directory outside any project, use that clone as
    `<tmp>/herdr-subagent` and skip to item 5.
-2. Create a new, empty temporary directory outside any project. Call it
-   `<tmp>`.
+2. Create a **new**, empty temporary directory outside any project, with a
+   unique name (for example with `mktemp -d`). Call it `<tmp>`. Never reuse an
+   existing directory, and never use `$TMPDIR/herdr-subagent/` or
+   `/tmp/herdr-subagent/`: the skill keeps its reports and session state
+   there, and step 6 deletes `<tmp>`.
 3. Check access without prompting for a password:
    `GIT_TERMINAL_PROMPT=0 git ls-remote --tags https://github.com/jpbaking/herdr-subagent`.
    If it fails with an authentication or not-found error, STOP. Tell the user
@@ -136,7 +139,8 @@ approval**. Do not leave two active copies for one harness.
 
 ## 6. Clean up and report
 
-1. Delete `<tmp>`.
+1. Delete `<tmp>`, the directory you created in step 1.2, and nothing else.
+   If you reused a clone the user already had (step 1.1), leave it alone.
 2. Report:
    - the installed tag or commit SHA;
    - every file and directory created, replaced, or removed;

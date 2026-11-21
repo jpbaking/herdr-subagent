@@ -39,6 +39,12 @@ the report before you hand it real work.
 
 ## opencode
 
+- A smaller local model (Ornith 1.5 35B through opencode) completed the README
+  install prompt and `AGENT-INSTALL.md` in a sandboxed `HOME`. It installed
+  correctly and left existing user files alone. It did, however, stage its
+  clone inside the skill's report folder, so the contract now forbids that
+  folder explicitly.
+
 - The interactive TUI has no model flag. It always uses the model set in the
   opencode configuration, so changing it means changing that configuration,
   which is the user's decision.
