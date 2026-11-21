@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Skill checks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Script parses
+        run: bash -n .agents/skills/herdr-subagent/scripts/herdr-subagent.sh
+      - name: Script is executable
+        run: test -x .agents/skills/herdr-subagent/scripts/herdr-subagent.sh
+      - name: Usage runs without herdr
+        run: .agents/skills/herdr-subagent/scripts/herdr-subagent.sh --help
+      - name: ShellCheck
+        if: runner.os == 'Linux'
+        run: shellcheck .agents/skills/herdr-subagent/scripts/herdr-subagent.sh
+      - name: Check Claude skill mirror is byte-identical
+        run: diff -r .agents/skills .claude/skills
+      - name: Check every SKILL.md is under agy's 24,000-byte limit
+        run: |
+          for f in .agents/skills/*/SKILL.md; do
+            n=$(wc -c < "$f")
+            if [ "$n" -ge 24000 ]; then echo "$f: $n bytes (limit 24000)"; exit 1; fi
+          done
